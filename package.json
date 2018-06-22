@@ -1,0 +1,35 @@
+{
+  "name": "uc-scroll",
+  "version": "1.0.0",
+  "description": "All you need to deal with the scroll",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unchainedui/scroll.git"
+  },
+  "keywords": [
+    "unchained",
+    "ui",
+    "browser",
+    "scroll",
+    "kiss"
+  ],
+  "author": "Alexey Novikov <v@2dubs.com> (http://2dubs.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/unchainedui/scroll/issues"
+  },
+  "homepage": "https://github.com/unchainedui/scroll#readme",
+  "dependencies": {
+    "uc-detective": "^1.0.1",
+    "uc-dom": "^1.0.0"
+  },
+  "devDependencies": {
+    "fuller": "^0.3.3",
+    "fuller-src-rollup": "^0.3.0",
+    "fuller-dst-file": "^0.3.1"
+  }
+}
