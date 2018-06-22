@@ -49,7 +49,7 @@ scroll.direction(window, dir => console.log('Direction', dir))
 
 #### scrollDirection(el, [options], cb)
 
-* *el** — element to scroll
+* **el** — element to scroll
 * **options**
   - **direction** — 'vertical || horizontal', default "vertical"
   - **threshold** — scroll change should be bigger that threshold, defaul 0
