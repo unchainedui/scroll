@@ -2,6 +2,9 @@
 
 ## Scroll
 
+[![NPM Version](https://img.shields.io/npm/v/uc-scroll.svg?style=flat-square)](https://www.npmjs.com/package/uc-scroll)
+[![NPM Downloads](https://img.shields.io/npm/dt/uc-scroll.svg?style=flat-square)](https://www.npmjs.com/package/uc-scroll)
+
 All you need to deal with the scroll
 
 ### To
