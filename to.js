@@ -43,7 +43,7 @@ export default function scrollTo(el, options, cb) {
   if (Object.keys(target).length) {
     return to(el, {
       a: target,
-      duration: options.duration || 1000,
+      duration: options.duration === undefined ? 1000 : options.duration,
       ease: options.ease || 'linear',
       cb: cb
     });
