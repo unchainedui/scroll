@@ -47,4 +47,4 @@ export default function scrollOn(el, options, cb) {
   }
 
   return on(el, parsed, cb);
-};
+}

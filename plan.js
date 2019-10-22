@@ -1,17 +1,15 @@
 'use strict';
 
-const js = {
-  'test.js': 'test.js'
-};
-
 module.exports = {
   options: {
     src: './',
     dst: './test'
   },
 
-  'default': {
-    js: js
+  'task:default': {
+    js: {
+      'test.js': 'test.js'
+    }
   },
 
   'belt:js': {

@@ -93,14 +93,42 @@
 
   const preTransform = prefixed('transform');
   const transition = prefixed('transition');
-
-  const isHDPI = window.devicePixelRatio && window.devicePixelRatio > 1;
-  const isSmall = screen.width < 415 || screen.height < 415;
-  const isGeolocation = !!navigator.geolocation;
-  const isCSSOM = window.CSS && CSS.number;
   const isTouch = !!('ontouchstart' in window);
 
-  const isSafari = /webkit/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+  const browser = (function() {
+    const ua = navigator.userAgent;
+    let tem;
+    let M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+
+    if (/trident/i.test(M[1])) {
+      tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+      return {
+        name: 'IE',
+        version: tem[1] ? parseFloat(tem[1]) : null
+      }
+    }
+
+    if (M[1] === 'Chrome') {
+      tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
+      if (tem !== null) {
+        return {
+          name: tem[1].replace('OPR', 'Opera'),
+          version: parseFloat(tem[2])
+        }
+      }
+    }
+
+    M = M[2] ? [ M[1], M[2] ] : [ navigator.appName, navigator.appVersion, '-?' ];
+
+    if ((tem = ua.match(/version\/(\d+)/i)) !== null) {
+      M.splice(1, 1, tem[1]);
+    }
+
+    return {
+      name: M[0],
+      version: parseFloat(M[1])
+    }
+  })();
 
   function linear(t, b, c, d) {
     return c * t / d + b;
@@ -202,7 +230,6 @@
     let s=1.70158;let p=0;let a=c;
     if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
     if (a < Math.abs(c)) { a=c; }
-    else { let s = p/(2*Math.PI) * Math.asin (c/a); }
     return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
   }
 
@@ -210,7 +237,6 @@
     let s=1.70158;let p=0;let a=c;
     if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
     if (a < Math.abs(c)) { a=c; }
-    else { let s = p/(2*Math.PI) * Math.asin (c/a); }
     return a*Math.pow(2,-10*t) * Math.sin( (t*d-s)*(2*Math.PI)/p ) + c + b;
   }
 
@@ -218,7 +244,6 @@
     let s=1.70158;let p=0;let a=c;
     if (t==0) return b;  if ((t/=d/2)==2) return b+c;  if (!p) p=d*(.3*1.5);
     if (a < Math.abs(c)) { a=c; }
-    else { let s = p/(2*Math.PI) * Math.asin (c/a);}
     if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
     return a*Math.pow(2,-10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )*.5 + c + b;
   }
@@ -240,6 +265,7 @@
   }
 
   var easing = /*#__PURE__*/Object.freeze({
+    __proto__: null,
     linear: linear,
     inQuad: inQuad,
     outQuad: outQuad,
@@ -270,14 +296,16 @@
     inOutBack: inOutBack
   });
 
+  const fix = browser.name === 'safari' && browser.version < 13;
+
   const userScrollEvent = 'onwheel' in document.createElement('div') ? 'wheel' : // Modern browsers support 'wheel'
     document.onmousewheel !== undefined ? 'mousewheel' : // Webkit and IE support at least 'mousewheel'
     'DOMMouseScroll'; // let's assume that remaining browsers are older Firefox
 
-  const windowScrollElement = isSafari ? document.body : document.documentElement;
+  const windowScrollElement = fix ? document.body : document.documentElement;
   function getScrollableEl(el) {
     if (el === window || el === document.body || el === document.documentElement) {
-      el = windowScrollElement;
+      return windowScrollElement;
     }
 
     return el
@@ -289,16 +317,19 @@
   const documentElement = document.documentElement;
 
   //handling window resize
+  let handleWindowResize;
   let windowResized = true;
   let wHeight;
   let wWidth;
 
-  const onWindowResize = on(window, 'resize', () => {
-    windowResized = true;
-  });
-
   //calc engine
   const engine = function() {
+    if (!handleWindowResize) {
+      handleWindowResize = on(window, 'resize', () => {
+        windowResized = true;
+      });
+    }
+
     if (windowResized) {
       wHeight = Math.max(documentElement.clientHeight, window.innerHeight || 0);
       wWidth = Math.max(documentElement.clientWidth, window.innerWidth || 0);
@@ -310,7 +341,12 @@
     }
 
     windowResized = false;
-    queueLength && requestAnimationFrame(engine);
+    if (queueLength) {
+      requestAnimationFrame(engine);
+    } else {
+      off(window, 'resize', handleWindowResize);
+      handleWindowResize = undefined;
+    }
   };
 
   //calcs
@@ -627,7 +663,7 @@
       currentConditions.push(condition);
     }
 
-    return on$1(el, parsed, cb);
+    return on$1(el, parsed);
   }
 
   function scrollTo(el, options, cb) {
@@ -635,7 +671,7 @@
 
     const target = {};
     let toEl = options.to;
-    const direction$$1 = options.direction || 'vertical';
+    const direction = options.direction || 'vertical';
 
     if (typeof toEl === 'string') {
       toEl = el.querySelector(toEl);
@@ -655,14 +691,14 @@
       toEl.left -= el.scrollLeft;
     }
 
-    if (direction$$1 === 'vertical' || direction$$1 === 'both') {
+    if (direction === 'vertical' || direction === 'both') {
       const topChange = toEl.top + (options.shiftTop || 0);
       if (topChange !== 0) {
         target.scrollTop = topChange;
       }
     }
 
-    if (direction$$1 === 'horizontal' || direction$$1 === 'both') {
+    if (direction === 'horizontal' || direction === 'both') {
       const leftChange = toEl.left + (options.shiftLeft || 0);
       if (leftChange !== 0) {
         target.scrollLeft = leftChange;
@@ -672,7 +708,7 @@
     if (Object.keys(target).length) {
       return to(el, {
         a: target,
-        duration: options.duration || 1000,
+        duration: options.duration === undefined ? 1000 : options.duration,
         ease: options.ease || 'linear',
         cb: cb
       });
@@ -701,10 +737,10 @@
 
   ready(() => {
     const elHeader = get('header').item(0);
-    on(elHeader, 'click', 'a', function(e) {
+    on(elHeader, 'click', 'a', e => {
       e.preventDefault();
       scroll.to(window, {
-        to: this.hash,
+        to: e.target.hash,
         ease: 'inOutExpo',
         duration: 1500
       });
@@ -712,7 +748,8 @@
 
     const elScroll = get('#scroll');
     const elContent = get('#content');
-    on(elContent, 'click', 'a.child', function() {
+    on(elContent, 'click', 'a.child', e => {
+      e.preventDefault();
       scroll.to(elScroll, {
         to: { top: 200, left: 50 },
         direction: 'both',

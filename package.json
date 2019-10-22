@@ -4,7 +4,7 @@
   "description": "All you need to deal with the scroll",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "fuller -wv"
   },
   "repository": {
     "type": "git",
@@ -28,8 +28,8 @@
     "uc-dom": "^1.0.0"
   },
   "devDependencies": {
-    "fuller": "^0.3.3",
-    "fuller-src-rollup": "^0.3.0",
+    "fuller": "^0.4.0",
+    "fuller-src-rollup": "^0.4.0",
     "fuller-dst-file": "^0.3.1"
   }
 }

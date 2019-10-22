@@ -9,16 +9,19 @@ const queue = {};
 const documentElement = document.documentElement;
 
 //handling window resize
+let handleWindowResize;
 let windowResized = true;
 let wHeight;
 let wWidth;
 
-const onWindowResize = eOn(window, 'resize', () => {
-  windowResized = true;
-});
-
 //calc engine
 const engine = function() {
+  if (!handleWindowResize) {
+    handleWindowResize = eOn(window, 'resize', () => {
+      windowResized = true;
+    });
+  }
+
   if (windowResized) {
     wHeight = Math.max(documentElement.clientHeight, window.innerHeight || 0);
     wWidth = Math.max(documentElement.clientWidth, window.innerWidth || 0);
@@ -30,7 +33,12 @@ const engine = function() {
   }
 
   windowResized = false;
-  queueLength && rAF(engine);
+  if (queueLength) {
+    rAF(engine);
+  } else {
+    eOff(window, 'resize', handleWindowResize);
+    handleWindowResize = undefined;
+  }
 };
 
 //calcs

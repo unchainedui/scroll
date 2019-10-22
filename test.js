@@ -3,10 +3,10 @@ import scroll from './index'
 
 ready(() => {
   const elHeader = get('header').item(0)
-  on(elHeader, 'click', 'a', function(e) {
+  on(elHeader, 'click', 'a', e => {
     e.preventDefault();
     scroll.to(window, {
-      to: this.hash,
+      to: e.target.hash,
       ease: 'inOutExpo',
       duration: 1500
     });
@@ -14,7 +14,8 @@ ready(() => {
 
   const elScroll = get('#scroll');
   const elContent = get('#content');
-  on(elContent, 'click', 'a.child', function() {
+  on(elContent, 'click', 'a.child', e => {
+    e.preventDefault();
     scroll.to(elScroll, {
       to: { top: 200, left: 50 },
       direction: 'both',
